@@ -12,73 +12,71 @@ const PEACH_SUNSET = [
 
 const BLOCK_FONT: Record<string, string[]> = {
   O: [
-    ' ██████ ',
-    '██    ██',
-    '██    ██',
-    '██    ██',
-    '██    ██',
-    '██    ██',
-    ' ██████ ',
+    ' █████ ',
+    '██   ██',
+    '██   ██',
+    '██   ██',
+    '██   ██',
+    '██   ██',
+    ' █████ ',
   ],
   P: [
-    '████████',
-    '██    ██',
-    '████████',
-    '██      ',
-    '██      ',
-    '██      ',
-    '██      ',
+    '██████ ',
+    '██   ██',
+    '██████ ',
+    '██     ',
+    '██     ',
+    '██     ',
+    '██     ',
   ],
   E: [
-    '████████',
-    '██      ',
-    '████████',
-    '██      ',
-    '██      ',
-    '██      ',
-    '████████',
+    '███████',
+    '██     ',
+    '██████ ',
+    '██     ',
+    '██     ',
+    '██     ',
+    '███████',
   ],
   N: [
-    '██    ██',
-    '███   ██',
-    '████  ██',
-    '██ ██ ██',
-    '██  ████',
-    '██   ███',
-    '██    ██',
+    '██   ██',
+    '███  ██',
+    '████ ██',
+    '██ ████',
+    '██  ███',
+    '██   ██',
+    '██   ██',
   ],
   A: [
-    '  ████  ',
-    ' ██  ██ ',
-    '████████',
-    '██    ██',
-    '██    ██',
-    '██    ██',
-    '██    ██',
+    '  ███  ',
+    ' ██ ██ ',
+    '███████',
+    '██   ██',
+    '██   ██',
+    '██   ██',
+    '██   ██',
   ],
   C: [
-    ' ██████ ',
-    '██    ██',
-    '██      ',
-    '██      ',
-    '██      ',
-    '██    ██',
-    ' ██████ ',
+    ' █████ ',
+    '██   ██',
+    '██     ',
+    '██     ',
+    '██     ',
+    '██   ██',
+    ' █████ ',
   ],
   H: [
-    '██    ██',
-    '██    ██',
-    '████████',
-    '██    ██',
-    '██    ██',
-    '██    ██',
-    '██    ██',
+    '██   ██',
+    '██   ██',
+    '███████',
+    '██   ██',
+    '██   ██',
+    '██   ██',
+    '██   ██',
   ],
 };
 
 const LABEL = 'OPENPEACH';
-const FRAME_WIDTH = 84;
-const INSIDE_WIDTH = FRAME_WIDTH - 2;
 
 function buildTextRows(): string[] {
   const rows: string[] = [];
@@ -94,22 +92,26 @@ function buildTextRows(): string[] {
 
 export function Banner() {
   const textRows = buildTextRows();
-  const leftIndent = '  ';
+  const leftIndent = ' ';
   const coloredRows = textRows.map((row) => leftIndent + gradient(PEACH_SUNSET)(row));
 
-  const topLabel = '  Welcome to OpenPeach';
-  const topInside = topLabel + ' '.repeat(INSIDE_WIDTH - topLabel.length);
-
-  const bottomLabel = 'CLI Version 0.0.1  ';
-  const bottomInside = ' '.repeat(INSIDE_WIDTH - bottomLabel.length) + bottomLabel;
-
   return (
-    <Box flexDirection="column" width={FRAME_WIDTH}>
-      <Text>{`┌${topInside}┐`}</Text>
-      {coloredRows.map((line, index) => (
-        <Text key={index}>{line}</Text>
-      ))}
-      <Text>{`└${bottomInside}┘`}</Text>
+    <Box flexDirection="column" width="100%">
+      <Box justifyContent="space-between">
+        <Text color="white">┌  Welcome to OpenPeach</Text>
+        <Text color="white">┐</Text>
+      </Box>
+
+      <Box flexDirection="column" alignItems="flex-start">
+        {coloredRows.map((line, index) => (
+          <Text key={index}>{line}</Text>
+        ))}
+      </Box>
+
+      <Box justifyContent="space-between">
+        <Text color="white">└</Text>
+        <Text color="white">CLI Version 0.0.1  </Text>
+      </Box>
     </Box>
   );
 }

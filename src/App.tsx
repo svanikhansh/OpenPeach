@@ -30,7 +30,9 @@ export function App() {
     <Box
       flexDirection="column"
       height="100%"
+      width="100%"
       justifyContent="space-between"
+      paddingY={1}
     >
       {isRawModeSupported && <InputHandler />}
 

@@ -13,7 +13,7 @@ function InteractivePrompt() {
 
   return (
     <Box>
-      <Text>{'> '}</Text>
+      <Text color="white">{'> '}</Text>
       <TextInput value={query} onChange={setQuery} />
     </Box>
   );
@@ -23,14 +23,23 @@ export function PromptBox() {
   const { isRawModeSupported } = useStdin();
 
   return (
-    <Box borderStyle="round" flexDirection="column" paddingX={1} width={84}>
-      <Text dimColor>
+    <Box
+      borderStyle="round"
+      borderColor="#FF9671"
+      flexDirection="column"
+      paddingX={1}
+      marginTop={1}
+      width="100%"
+    >
+      <Text dimColor color="white">
         {'> Enter @ to mention files or / for commands'}
       </Text>
       {isRawModeSupported ? (
         <InteractivePrompt />
       ) : (
-        <Text dimColor>{'> (interactive input requires a TTY)'}</Text>
+        <Text dimColor color="white">
+          {'> (interactive input requires a TTY)'}
+        </Text>
       )}
     </Box>
   );

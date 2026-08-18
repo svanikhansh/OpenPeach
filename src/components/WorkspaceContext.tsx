@@ -33,10 +33,10 @@ export function WorkspaceContext() {
   const { cwd, branch, dirty } = getWorkspaceContext();
 
   return (
-    <Box>
-      <Text dimColor>
-        {cwd} [<Text color="cyan">git: {branch}</Text>
-        {dirty ? ' ⚡' : ''}]
+    <Box paddingTop={1}>
+      <Text dimColor color="white">
+        {cwd} [<Text color="#FF9671">git: {branch}</Text>
+        {dirty ? ' *' : ''}]
       </Text>
     </Box>
   );

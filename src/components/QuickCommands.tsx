@@ -6,7 +6,7 @@ const COMMANDS = ['/connect', '/stats', '/hooks', '/clear'];
 export function QuickCommands() {
   return (
     <Box>
-      <Text dimColor>
+      <Text dimColor color="white">
         Quick commands: {COMMANDS.join('  ')}
       </Text>
     </Box>
