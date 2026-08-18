@@ -29,7 +29,6 @@ export function App() {
       flexDirection="column"
       height="100%"
       justifyContent="space-between"
-      padding={1}
     >
       {isRawModeSupported && <InputHandler />}
 
