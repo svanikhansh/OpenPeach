@@ -24,6 +24,12 @@ Or run once with npx:
 npx openpeach
 ```
 
+Or install with curl:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/svanikhansh/OpenPeach/main/install.sh | sh
+```
+
 ## Usage
 
 After installing globally, start the CLI with:
