@@ -1,16 +1,35 @@
 # OpenPeach
 
-A short description of what OpenPeach does.
+A modern terminal UI CLI framework built with Node.js, TypeScript, Ink, React, Chalk, Gradient-String, and Figlet.
+
+## Features
+
+- Big ASCII banner with a sunset gradient
+- Framed header and prompt box
+- Status lines with colored connection dots
+- Interactive text input with keyboard shortcuts
+- Copilot-CLI-inspired layout
 
 ## Getting Started
 
-Instructions for setting up the project locally.
-
 ```bash
-# Clone the repository
-git clone https://github.com/username/OpenPeach.git
-cd OpenPeach
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run dev
+
+# Build for production
+npm run build
+
+# Run the compiled CLI
+node ./dist/index.js
 ```
+
+## Keyboard Shortcuts
+
+- `Ctrl+C` — Exit
+- `Ctrl+R` — Expand all (placeholder)
 
 ## Contributing
 
