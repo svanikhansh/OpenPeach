@@ -10,7 +10,29 @@ A modern terminal UI CLI framework built with Node.js, TypeScript, Ink, React, C
 - Interactive text input with keyboard shortcuts
 - Copilot-CLI-inspired layout
 
-## Getting Started
+## Installation
+
+Install globally with npm:
+
+```bash
+npm install -g openpeach
+```
+
+Or run once with npx:
+
+```bash
+npx openpeach
+```
+
+## Usage
+
+After installing globally, start the CLI with:
+
+```bash
+openpeach
+```
+
+## Development
 
 ```bash
 # Install dependencies

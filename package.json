@@ -3,15 +3,25 @@
   "version": "0.0.1",
   "description": "A modern terminal UI CLI framework powered by Ink, React, and TypeScript.",
   "type": "module",
-  "main": "./dist/index.js",
+  "main": "dist/index.js",
   "bin": {
-    "openpeach": "./dist/index.js"
+    "openpeach": "dist/index.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "tsx src/index.tsx",
     "start": "tsx src/index.tsx",
     "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/svanikhansh/OpenPeach.git"
   },
   "keywords": [
     "cli",
@@ -21,6 +31,9 @@
     "typescript"
   ],
   "license": "Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "chalk": "^5.3.0",
     "figlet": "^1.7.0",
