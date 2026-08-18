@@ -6,22 +6,44 @@ Set-StrictMode -Version Latest
 
 $Repo = "svanikhansh/OpenPeach"
 $Package = "openpeach"
+$PM = $null
 
 function Test-CommandExists {
   param([string]$Command)
   $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
 }
 
-function Install-FromNpm {
-  Write-Host "Trying npm registry ($Package)..."
-  npm install -g $Package
+function Get-PackageManager {
+  if (Test-CommandExists "npm") { return "npm" }
+  if (Test-CommandExists "pnpm") { return "pnpm" }
+  if (Test-CommandExists "yarn") { return "yarn" }
+  return $null
+}
+
+function Install-Global {
+  param([string]$Spec)
+  if ($PM -eq "yarn") {
+    $yarnMajor = (yarn --version) -replace '^(\d+).*', '$1'
+    if ($yarnMajor -eq "1") {
+      yarn global add $Spec
+    } else {
+      Write-Host "Error: Yarn $yarnMajor does not support global installation. Use npm or pnpm instead."
+      return $false
+    }
+  } else {
+    & $PM install -g $Spec
+  }
   return $LASTEXITCODE -eq 0
 }
 
-function Install-FromGitHubNpm {
-  Write-Host "Trying GitHub via npm (github:$Repo)..."
-  npm install -g "github:$Repo"
-  return $LASTEXITCODE -eq 0
+function Install-FromRegistry {
+  Write-Host "Trying registry ($Package) via $PM..."
+  return Install-Global $Package
+}
+
+function Install-FromGitHubPm {
+  Write-Host "Trying GitHub via $PM (github:$Repo)..."
+  return Install-Global "github:$Repo"
 }
 
 function Install-FromGitHubZip {
@@ -35,8 +57,7 @@ function Install-FromGitHubZip {
     $extracted = Join-Path $tmp "OpenPeach-main"
     Push-Location $extracted
     try {
-      npm install -g .
-      return $LASTEXITCODE -eq 0
+      return Install-Global "."
     } finally {
       Pop-Location
     }
@@ -63,14 +84,17 @@ if ($nodeMajor -lt 18) {
 
 Write-Host "Node.js $nodeVersion detected."
 
-if (-not (Test-CommandExists "npm")) {
-  Write-Host "Error: npm is required but not installed."
+$PM = Get-PackageManager
+if ($null -eq $PM) {
+  Write-Host "Error: npm, pnpm, or yarn is required but none were found."
   exit 1
 }
 
+Write-Host "Using package manager: $PM"
+
 $installed = $false
-if (Install-FromNpm) { $installed = $true }
-elseif (Install-FromGitHubNpm) { $installed = $true }
+if (Install-FromRegistry) { $installed = $true }
+elseif (Install-FromGitHubPm) { $installed = $true }
 elseif (Install-FromGitHubZip) { $installed = $true }
 
 if (-not $installed) {
@@ -78,6 +102,8 @@ if (-not $installed) {
   Write-Host "Error: installation failed."
   Write-Host "Please check your network connection and try again, or install manually:"
   Write-Host "  npm install -g $Package"
+  Write-Host "  pnpm install -g $Package"
+  Write-Host "  yarn global add $Package"
   Write-Host "  npm install -g github:$Repo"
   exit 1
 }

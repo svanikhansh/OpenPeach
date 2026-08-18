@@ -18,6 +18,18 @@ Install globally with npm:
 npm install -g openpeach
 ```
 
+With pnpm:
+
+```bash
+pnpm install -g openpeach
+```
+
+With yarn (v1):
+
+```bash
+yarn global add openpeach
+```
+
 Or run once with npx:
 
 ```bash
@@ -42,6 +54,18 @@ Or install manually with npm:
 
 ```powershell
 npm install -g openpeach
+```
+
+With pnpm:
+
+```powershell
+pnpm install -g openpeach
+```
+
+With yarn (v1):
+
+```powershell
+yarn global add openpeach
 ```
 
 ## Usage

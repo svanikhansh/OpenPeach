@@ -7,6 +7,7 @@ set -eu
 REPO="svanikhansh/OpenPeach"
 PACKAGE="openpeach"
 TMP_DIR=""
+PM=""
 
 cleanup() {
   if [ -n "${TMP_DIR:-}" ] && [ -d "$TMP_DIR" ]; then
@@ -43,6 +44,33 @@ download() {
   fi
 }
 
+detect_package_manager() {
+  if command_exists npm; then
+    echo "npm"
+  elif command_exists pnpm; then
+    echo "pnpm"
+  elif command_exists yarn; then
+    echo "yarn"
+  else
+    echo ""
+  fi
+}
+
+install_global() {
+  spec="$1"
+  if [ "$PM" = "yarn" ]; then
+    yarn_major=$(yarn --version | cut -d. -f1)
+    if [ "$yarn_major" = "1" ]; then
+      yarn global add "$spec"
+    else
+      echo "Error: Yarn $yarn_major does not support global installation. Use npm or pnpm instead."
+      return 1
+    fi
+  else
+    "$PM" install -g "$spec"
+  fi
+}
+
 echo "OpenPeach Installer"
 echo "===================="
 
@@ -60,19 +88,22 @@ fi
 
 echo "Node.js $(node -v) detected."
 
-if ! command_exists npm; then
-  echo "Error: npm is required but not installed."
+PM=$(detect_package_manager)
+if [ -z "$PM" ]; then
+  echo "Error: npm, pnpm, or yarn is required but none were found."
   exit 1
 fi
 
-install_from_npm() {
-  echo "Trying npm registry ($PACKAGE)..."
-  npm install -g "$PACKAGE"
+echo "Using package manager: $PM"
+
+install_from_registry() {
+  echo "Trying registry ($PACKAGE) via $PM..."
+  install_global "$PACKAGE"
 }
 
-install_from_github_npm() {
-  echo "Trying GitHub via npm (github:$REPO)..."
-  npm install -g "github:$REPO"
+install_from_github_pm() {
+  echo "Trying GitHub via $PM (github:$REPO)..."
+  install_global "github:$REPO"
 }
 
 install_from_github_tarball() {
@@ -97,14 +128,14 @@ install_from_github_tarball() {
   fi
 
   echo "Installing from downloaded source..."
-  (cd "$EXTRACTED" && npm install -g .)
+  (cd "$EXTRACTED" && install_global .)
 }
 
 INSTALLED=false
 
-if install_from_npm; then
+if install_from_registry; then
   INSTALLED=true
-elif install_from_github_npm; then
+elif install_from_github_pm; then
   INSTALLED=true
 elif install_from_github_tarball; then
   INSTALLED=true
@@ -115,6 +146,8 @@ if [ "$INSTALLED" != "true" ]; then
   echo "Error: installation failed."
   echo "Please check your network connection and try again, or install manually:"
   echo "  npm install -g $PACKAGE"
+  echo "  pnpm install -g $PACKAGE"
+  echo "  yarn global add $PACKAGE"
   echo "  npm install -g github:$REPO"
   exit 1
 fi
