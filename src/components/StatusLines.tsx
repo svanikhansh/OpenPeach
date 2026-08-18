@@ -5,11 +5,7 @@ import chalk from 'chalk';
 export function StatusLines() {
   return (
     <Box flexDirection="column" paddingTop={1} paddingBottom={1}>
-      <Box>
-        <Text backgroundColor="blue" color="white" bold>
-          {' Version 0.0.1 '}
-        </Text>
-      </Box>
+      <Text dimColor>Version 0.0.1 · Commit dev-build</Text>
 
       <Box flexDirection="column" paddingTop={1}>
         <Text>

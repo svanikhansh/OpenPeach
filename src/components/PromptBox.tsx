@@ -23,7 +23,7 @@ export function PromptBox() {
   const { isRawModeSupported } = useStdin();
 
   return (
-    <Box borderStyle="single" flexDirection="column" paddingX={1}>
+    <Box borderStyle="round" flexDirection="column" paddingX={1}>
       <Text dimColor>
         {'> Enter @ to mention files or / for commands'}
       </Text>
