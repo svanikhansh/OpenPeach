@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, useApp, useInput, useStdin } from 'ink';
 import { Banner } from './components/Banner.js';
 import { StatusLines } from './components/StatusLines.js';
-import { WorkspaceContext } from './components/WorkspaceContext.js';
+import { WorkspaceContextProvider, WorkspaceContextDisplay } from './components/WorkspaceContext.js';
 import { QuickCommands } from './components/QuickCommands.js';
 import { PromptBox } from './components/PromptBox.js';
 import { ShortcutBar } from './components/ShortcutBar.js';
@@ -27,26 +27,28 @@ export function App() {
   const { isRawModeSupported } = useStdin();
 
   return (
-    <Box
-      flexDirection="column"
-      height="100%"
-      width="100%"
-      justifyContent="space-between"
-      paddingY={1}
-    >
-      {isRawModeSupported && <InputHandler />}
+    <WorkspaceContextProvider>
+      <Box
+        flexDirection="column"
+        height="100%"
+        width="100%"
+        justifyContent="space-between"
+        paddingY={1}
+      >
+        {isRawModeSupported && <InputHandler />}
 
-      <Box flexDirection="column">
-        <Banner />
-        <StatusLines />
-      </Box>
+        <Box flexDirection="column">
+          <Banner />
+          <StatusLines />
+        </Box>
 
-      <Box flexDirection="column">
-        <QuickCommands />
-        <WorkspaceContext />
-        <PromptBox />
-        <ShortcutBar />
+        <Box flexDirection="column">
+          <QuickCommands />
+          <WorkspaceContextDisplay />
+          <PromptBox />
+          <ShortcutBar />
+        </Box>
       </Box>
-    </Box>
+    </WorkspaceContextProvider>
   );
 }

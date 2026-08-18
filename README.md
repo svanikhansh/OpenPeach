@@ -9,6 +9,7 @@ A modern terminal UI CLI framework built with Node.js, TypeScript, Ink, React, C
 - Status lines with colored connection dots
 - Interactive text input with keyboard shortcuts
 - Copilot-CLI-inspired layout
+- **Token optimization hooks for Claude Code** — automatically truncates verbose tool output
 
 ## Installation
 
@@ -70,10 +71,26 @@ yarn global add openpeach
 
 ## Usage
 
-After installing globally, start the CLI with:
+After installing globally, start the TUI with:
 
 ```bash
 openpeach
+```
+
+### Connect Hooks to a Project
+
+Run inside a Claude Code project to install the PostToolUse hook:
+
+```bash
+peach connect
+```
+
+This adds an entry to `.claude/settings.json` that intercepts `Bash`, `Read`, and `Grep` tool output and truncates responses over ~2000 characters.
+
+The hook command is invoked automatically by Claude Code — you don't run it manually:
+
+```bash
+peach hook posttooluse
 ```
 
 ## Development
@@ -82,20 +99,59 @@ openpeach
 # Install dependencies
 npm install
 
-# Run in development mode
+# Run TUI in development mode
 npm run dev
+
+# Run CLI in development mode
+npm run dev:cli
 
 # Build for production
 npm run build
 
-# Run the compiled CLI
+# Run the compiled TUI
 node ./dist/index.js
+
+# Run the compiled CLI
+node ./dist/cli.js
 ```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `peach connect` | Connect OpenPeach hooks to current project |
+| `peach hook posttooluse` | PostToolUse hook handler (invoked by Claude Code) |
 
 ## Keyboard Shortcuts
 
 - `Ctrl+C` — Exit
 - `Ctrl+R` — Expand all (placeholder)
+
+## Hook Mechanism
+
+When `peach connect` runs, it adds a `PostToolUse` hook to `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash|Read|Grep",
+        "hooks": [{ "type": "command", "command": "peach hook posttooluse" }]
+      }
+    ]
+  }
+}
+```
+
+When a matched tool runs in Claude Code and its output exceeds ~2000 characters:
+1. The hook reads the JSON payload from stdin
+2. Truncates to first 40 lines + last 20 lines with `[...N lines omitted...]` marker
+3. Estimates tokens saved: `(original_chars - truncated_chars) / 4`
+4. Logs intervention to `~/.openpeach/sessions/<session_id>.jsonl`
+5. Returns truncated output to Claude Code via `hookSpecificOutput`
+
+The TUI displays live stats: connection status, session ID, interventions count, and estimated tokens saved.
 
 ## Troubleshooting
 

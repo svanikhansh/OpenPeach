@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "description": "A modern terminal UI CLI framework powered by Ink, React, and TypeScript.",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/cli.js",
   "bin": {
+    "peach": "dist/cli.js",
     "openpeach": "dist/index.js"
   },
   "files": [
@@ -15,6 +16,7 @@
   "scripts": {
     "dev": "tsx src/index.tsx",
     "start": "tsx src/index.tsx",
+    "dev:cli": "tsx src/cli.ts",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "prepare": "npm run build"
@@ -36,6 +38,7 @@
   },
   "dependencies": {
     "chalk": "^5.3.0",
+    "commander": "^12.1.0",
     "figlet": "^1.7.0",
     "gradient-string": "^3.0.0",
     "ink": "^5.0.0",
@@ -44,7 +47,7 @@
   },
   "devDependencies": {
     "@types/figlet": "^1.5.8",
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.20.1",
     "@types/react": "^18.3.3",
     "tsx": "^4.16.2",
     "typescript": "^5.5.4"
