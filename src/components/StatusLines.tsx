@@ -12,7 +12,16 @@ export function StatusLines() {
           {chalk.green('●')} Connected to OpenPeach Engine
         </Text>
         <Text>
+          {chalk.cyan('●')} Active Interceptors: PostToolUse (Bash, Read, Grep)
+        </Text>
+        <Text>
           {chalk.magenta('●')} Logged in as: user
+        </Text>
+      </Box>
+
+      <Box paddingTop={1}>
+        <Text dimColor>
+          ⚡ Savings Engine: Active  ·  Tokens Intercepted: 0 (0.0% compressed)
         </Text>
       </Box>
     </Box>

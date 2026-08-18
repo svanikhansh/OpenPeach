@@ -2,6 +2,8 @@ import React from 'react';
 import { Box, useApp, useInput, useStdin } from 'ink';
 import { Banner } from './components/Banner.js';
 import { StatusLines } from './components/StatusLines.js';
+import { WorkspaceContext } from './components/WorkspaceContext.js';
+import { QuickCommands } from './components/QuickCommands.js';
 import { PromptBox } from './components/PromptBox.js';
 import { ShortcutBar } from './components/ShortcutBar.js';
 
@@ -38,6 +40,8 @@ export function App() {
       </Box>
 
       <Box flexDirection="column">
+        <QuickCommands />
+        <WorkspaceContext />
         <PromptBox />
         <ShortcutBar />
       </Box>
