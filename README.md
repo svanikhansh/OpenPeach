@@ -73,6 +73,70 @@ node ./dist/index.js
 - `Ctrl+C` — Exit
 - `Ctrl+R` — Expand all (placeholder)
 
+## Troubleshooting
+
+### `openpeach` command not found
+
+The global npm bin directory may not be in your PATH. Reload your shell or add:
+
+```bash
+# macOS/Linux
+export PATH="$(npm config get prefix)/bin:$PATH"
+```
+
+```powershell
+# Windows PowerShell
+$env:PATH += ";$(npm config get prefix)"
+```
+
+### Node.js version error
+
+OpenPeach requires Node.js 18 or later. Check your version:
+
+```bash
+node -v
+```
+
+Install or upgrade Node.js from [https://nodejs.org/](https://nodejs.org/).
+
+### curl/wget not found (macOS/Linux installer)
+
+The curl installer requires `curl` or `wget` for the GitHub tarball fallback. If both are missing, install one of them or use npm directly:
+
+```bash
+npm install -g openpeach
+```
+
+### Network or registry unreachable
+
+If the npm registry is unreachable, the installer automatically falls back to installing from GitHub. If that also fails:
+
+```bash
+npm install -g github:svanikhansh/OpenPeach
+```
+
+### Windows execution policy error
+
+If PowerShell blocks the installer with an execution-policy error, run:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Then re-run the installer.
+
+### Install from source
+
+If all else fails, clone the repository and build locally:
+
+```bash
+git clone https://github.com/svanikhansh/OpenPeach.git
+cd OpenPeach
+npm install
+npm run build
+npm install -g .
+```
+
 ## Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

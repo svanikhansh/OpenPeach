@@ -1,12 +1,15 @@
 #!/bin/sh
-set -e
+set -eu
+
+# Security note: this script is intended to be fetched via HTTPS and reviewed
+# before execution. Do not pipe directly from an untrusted source.
 
 REPO="svanikhansh/OpenPeach"
 PACKAGE="openpeach"
 TMP_DIR=""
 
 cleanup() {
-  if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+  if [ -n "${TMP_DIR:-}" ] && [ -d "$TMP_DIR" ]; then
     rm -rf "$TMP_DIR"
   fi
 }
@@ -21,9 +24,9 @@ make_temp_dir() {
   if command_exists mktemp; then
     mktemp -d
   else
-    TMP_DIR="/tmp/openpeach-install-$$"
-    mkdir -p "$TMP_DIR"
-    echo "$TMP_DIR"
+    dir="/tmp/openpeach-install-$$"
+    mkdir -p "$dir"
+    echo "$dir"
   fi
 }
 

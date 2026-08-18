@@ -1,3 +1,9 @@
+#Requires -Version 5.1
+# Security note: review this script before executing it. It is fetched via
+# HTTPS from GitHub; do not run scripts from untrusted sources.
+
+Set-StrictMode -Version Latest
+
 $Repo = "svanikhansh/OpenPeach"
 $Package = "openpeach"
 
