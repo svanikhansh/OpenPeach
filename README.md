@@ -30,6 +30,20 @@ Or install with curl:
 curl -fsSL https://raw.githubusercontent.com/svanikhansh/OpenPeach/main/install.sh | sh
 ```
 
+### Windows (PowerShell)
+
+Install with PowerShell:
+
+```powershell
+irm https://raw.githubusercontent.com/svanikhansh/OpenPeach/main/install.ps1 | iex
+```
+
+Or install manually with npm:
+
+```powershell
+npm install -g openpeach
+```
+
 ## Usage
 
 After installing globally, start the CLI with:
