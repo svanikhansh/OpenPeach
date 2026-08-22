@@ -1,0 +1,162 @@
+[
+  {
+    "file": "src/hooks/useHookState.ts",
+    "line": 53,
+    "severity": "high",
+    "category": "correctness",
+    "description": "Directory traversal in detectProject() has no depth limit and could infinite loop or traverse outside workspace if symlinks create cycles. The while condition `currentDir !== path.parse(currentDir).root` protects against root but not symlink cycles.",
+    "suggestion": "Add a max-depth limit (e.g., 50) and track visited directories to prevent symlink cycles."
+  },
+  {
+    "file": "src/hooks/useHookState.ts",
+    "line": 103,
+    "severity": "high",
+    "category": "performance",
+    "description": "Polling interval setInterval runs every 2 seconds unconditionally, even when app is backgrounded or user is inactive. No cleanup on window blur / app suspend. Wastes CPU and filesystem I/O.",
+    "suggestion": "Use requestAnimationFrame or visibilitychange-aware polling, or switch to fs.watch() for log file changes instead of polling."
+  },
+  {
+    "file": "src/hooks/useHookState.ts",
+    "line": 113,
+    "severity": "medium",
+    "category": "correctness",
+    "description": "fs.readdir() reads entire session directory on every poll (every 2s). With many session files, this is O(n) filesystem operations. No caching of file list between polls.",
+    "suggestion": "Use fs.watch() on the sessions directory to detect new/modified files, or at minimum cache file list and only re-read on change events."
+  },
+  {
+    "file": "src/hooks/useHookState.ts",
+    "line": 144,
+    "severity": "medium",
+    "category": "performance",
+    "description": "Entire log file re-read and re-parsed on every poll (every 2s). For large sessions with many log entries, this re-processes all history repeatedly. O(n) per poll where n grows over session lifetime.",
+    "suggestion": "Track last read position (file size/offset) and only read new lines. Or use fs.watch() to trigger incremental reads."
+  },
+  {
+    "file": "src/hooks/useHookState.ts",
+    "line": 91,
+    "severity": "low",
+    "category": "code-quality",
+    "description": "Empty catch block swallows all errors when reading settings.json - no logging or diagnostics. If settings.json is malformed JSON, isConnected silently becomes false with no indication why.",
+    "suggestion": "Add console.error or debug logging in catch block to aid troubleshooting connection issues."
+  },
+  {
+    "file": "src/commands/hook-posttooluse.ts",
+    "line": 212,
+    "severity": "high",
+    "category": "security",
+    "description": "stdin read loop concatenates chunks to string without size limit. A malicious or buggy caller could stream unlimited data, causing OOM. No max payload size enforcement.",
+    "suggestion": "Add a hard limit on accumulated payload size (e.g., 10MB) and abort if exceeded."
+  },
+  {
+    "file": "src/commands/hook-posttooluse.ts",
+    "line": 224,
+    "severity": "medium",
+    "category": "correctness",
+    "description": "JSON.parse() in try-catch exits silently on invalid JSON. This is correct for hook robustness but makes debugging impossible - no error output to stderr to indicate payload format issues.",
+    "suggestion": "Log parse errors to stderr (not stdout) so they appear in Claude Code logs but don't break the hook protocol."
+  },
+  {
+    "file": "src/commands/hook-posttooluse.ts",
+    "line": 235,
+    "severity": "low",
+    "category": "code-quality",
+    "description": "TRUNCATE_THRESHOLD (2000) is a magic number hardcoded as const but used in multiple places. HEAD_CHAR_BUDGET (1200) + TAIL_CHAR_BUDGET (600) = 1800 < 2000, meaning truncation always reduces output - but the relationship is opaque.",
+    "suggestion": "Group constants into a config object with comments explaining the budget math: threshold > head + tail."
+  },
+  {
+    "file": "src/commands/hook-posttooluse.ts",
+    "line": 168,
+    "severity": "medium",
+    "category": "correctness",
+    "description": "omittedAfter calculation has a bug: `middleLines.length - (headEndIdx + anchorBlocks[anchorBlocks.length - 1].endIdx - headEndIdx)` simplifies to `middleLines.length - anchorBlocks[last].endIdx`, but endIdx is already relative to middleLines, so this is correct. However, the expression is overly complex and error-prone.",
+    "suggestion": "Simplify to `middleLines.length - anchorBlocks[anchorBlocks.length - 1].endIdx` and add a comment."
+  },
+  {
+    "file": "src/components/PromptBox.tsx",
+    "line": 8,
+    "severity": "critical",
+    "category": "correctness",
+    "description": "InteractivePrompt uses useInput but does NOT handle the input - it only clears query on Enter. The actual query text is never processed, submitted, or passed anywhere. The input is effectively a no-op.",
+    "suggestion": "Add onSubmit callback prop to InteractivePrompt and invoke it with query.trim() on Enter. Wire up to command handling in parent."
+  },
+  {
+    "file": "src/components/QuickCommands.tsx",
+    "line": 4,
+    "severity": "low",
+    "category": "code-quality",
+    "description": "COMMANDS array is hardcoded but '/connect', '/stats', '/hooks', '/clear' suggest these should be actual CLI commands. No integration with commander program from cli.ts.",
+    "suggestion": "Either make QuickCommands dynamic by reading from command registry, or remove if purely decorative."
+  },
+  {
+    "file": "src/components/Banner.tsx",
+    "line": 94,
+    "severity": "low",
+    "category": "performance",
+    "description": "buildTextRows() called on every render. It reconstructs the same static strings each time. No memoization.",
+    "suggestion": "Move textRows to module-level constant or use useMemo. The banner never changes."
+  },
+  {
+    "file": "src/components/StatusLines.tsx",
+    "line": 18,
+    "severity": "low",
+    "category": "code-quality",
+    "description": "Uses chalk.hex() for colors but ink components accept color props directly. Mixing chalk with ink's color system is redundant and adds a dependency.",
+    "suggestion": "Use ink's color prop: <Text color=\"#FFF4E6\">●</Text> instead of chalk.hex(DOTS[0])('●')."
+  },
+  {
+    "file": "src/components/WorkspaceContext.tsx",
+    "line": 37,
+    "severity": "high",
+    "category": "security",
+    "description": "execFileSync with user-controlled cwd (process.cwd()) - if cwd is manipulated via symlinks or path traversal, could execute git in unintended directories. However, cwd is process.cwd() so limited risk.",
+    "suggestion": "Validate cwd is within expected workspace before execFileSync. Use resolved absolute paths."
+  },
+  {
+    "file": "src/components/WorkspaceContext.tsx",
+    "line": 32,
+    "severity": "medium",
+    "category": "correctness",
+    "description": "getWorkspaceContext() runs synchronously on every render (called from Provider). execFileSync blocks the main thread. With useStdin() in App, this runs once on mount but any re-render of Provider would re-execute.",
+    "suggestion": "Move getWorkspaceContext() outside component or memoize with useMemo. Currently only called once since Provider doesn't re-render, but fragile."
+  },
+  {
+    "file": "src/App.tsx",
+    "line": 13,
+    "severity": "medium",
+    "category": "correctness",
+    "description": "InputHandler registers Ctrl+R handler but does nothing (placeholder comment). Keyboard shortcut advertised in ShortcutBar but non-functional.",
+    "suggestion": "Either implement expand-all functionality or remove the handler and shortcut bar mention."
+  },
+  {
+    "file": "src/App.tsx",
+    "line": 38,
+    "severity": "low",
+    "category": "code-quality",
+    "description": "InputHandler returns null but is conditionally rendered. This works but is an anti-pattern - better to not render the component at all via early return in App.",
+    "suggestion": "Move the isRawModeSupported check inside InputHandler or use early return in App to avoid mounting null."
+  },
+  {
+    "file": "src/index.tsx",
+    "line": 1,
+    "severity": "low",
+    "category": "architecture",
+    "description": "Entry point is minimal but lacks error boundary. Any render error in App crashes the entire CLI without graceful handling.",
+    "suggestion": "Wrap render in try-catch or use React error boundary for graceful degradation."
+  },
+  {
+    "file": "src/hooks/useHookState.ts",
+    "line": 42,
+    "severity": "medium",
+    "category": "architecture",
+    "description": "useHookState combines two unrelated concerns: (1) project detection/connection state, (2) session stats polling. Violates single responsibility. Testing and reuse are harder.",
+    "suggestion": "Split into useProjectDetection() and useSessionStats() hooks. Compose in WorkspaceContextProvider."
+  },
+  {
+    "file": "src/components/WorkspaceContext.tsx",
+    "line": 57,
+    "severity": "low",
+    "category": "architecture",
+    "description": "WorkspaceContextProvider calls getWorkspaceContext() (sync, blocking) during render. Should be in useEffect or useMemo to avoid blocking on mount.",
+    "suggestion": "Move getWorkspaceContext() to useEffect with empty deps and set state, or use useMemo if keeping sync."
+  }
+]

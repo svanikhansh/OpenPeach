@@ -152,12 +152,12 @@ if [ "$INSTALLED" != "true" ]; then
   exit 1
 fi
 
-if command_exists openpeach; then
+if command_exists peach; then
   echo ""
   echo "OpenPeach installed successfully."
-  echo "Run it with: openpeach"
+  echo "Run it with: peach"
 else
   echo ""
-  echo "Installation complete, but the 'openpeach' command is not in your PATH."
+  echo "Installation complete, but the 'peach' command is not in your PATH."
   echo "You may need to reload your shell or add your global npm bin to PATH."
 fi

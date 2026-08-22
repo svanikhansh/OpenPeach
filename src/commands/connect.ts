@@ -4,6 +4,12 @@ import path from 'path';
 import os from 'os';
 import chalk from 'chalk';
 
+export interface ConnectResult {
+  connected: boolean;
+  alreadyConnected: boolean;
+  message: string;
+}
+
 interface SettingsFile {
   hooks?: {
     PostToolUse?: Array<{
@@ -16,10 +22,7 @@ interface SettingsFile {
   };
 }
 
-export const connectCommand = new Command('connect')
-  .description('Connect OpenPeach hooks to current Claude Code project')
-  .action(async () => {
-    const cwd = process.cwd();
+export async function connectProject(cwd = process.cwd()): Promise<ConnectResult> {
     const claudeDir = path.join(cwd, '.claude');
     const settingsPath = path.join(claudeDir, 'settings.json');
 
@@ -33,9 +36,11 @@ export const connectCommand = new Command('connect')
     }
 
     if (!hasClaudeDir) {
-      console.log(chalk.yellow('No .claude directory found in current project.'));
-      console.log(chalk.gray('Run `claude init` or create .claude/ manually, then run `peach connect` again.'));
-      process.exit(1);
+      return {
+        connected: false,
+        alreadyConnected: false,
+        message: 'No .claude directory found. Run `claude init` or create .claude/ first.',
+      };
     }
 
     // Read existing settings or create new
@@ -70,11 +75,11 @@ export const connectCommand = new Command('connect')
     }
 
     if (alreadyConnected) {
-      console.log(chalk.green('✓ OpenPeach hook already connected in this project.'));
-      console.log(chalk.gray(`  Matcher: ${ourMatcher}`));
-      console.log(chalk.gray(`  Command: ${ourCommand}`));
-      console.log(chalk.gray(`  Scope: Project-level (.claude/settings.json)`));
-      return;
+      return {
+        connected: true,
+        alreadyConnected: true,
+        message: 'OpenPeach hook is already connected in this project.',
+      };
     }
 
     // Add our hook entry
@@ -93,10 +98,24 @@ export const connectCommand = new Command('connect')
     await fs.mkdir(claudeDir, { recursive: true });
     await fs.writeFile(settingsPath, JSON.stringify(settings, null, 2));
 
-    console.log(chalk.green('✓ OpenPeach hook connected successfully!'));
-    console.log(chalk.gray(`  Matcher: ${ourMatcher}`));
-    console.log(chalk.gray(`  Command: ${ourCommand}`));
-    console.log(chalk.gray(`  Scope: Project-level (.claude/settings.json)`));
-    console.log();
-    console.log(chalk.gray('Start Claude Code in this project to activate the hook.'));
+    return {
+      connected: true,
+      alreadyConnected: false,
+      message: 'OpenPeach hook connected successfully. Start Claude Code to activate it.',
+    };
+}
+
+export const connectCommand = new Command('connect')
+  .description('Connect OpenPeach hooks to current Claude Code project')
+  .action(async () => {
+    const result = await connectProject();
+    const output = result.connected ? chalk.green(result.message) : chalk.yellow(result.message);
+    console.log(output);
+    if (result.connected) {
+      console.log(chalk.gray('  Matcher: Bash|Read|Grep'));
+      console.log(chalk.gray('  Command: peach hook posttooluse'));
+      console.log(chalk.gray('  Scope: Project-level (.claude/settings.json)'));
+    } else {
+      process.exitCode = 1;
+    }
   });

@@ -71,11 +71,19 @@ yarn global add openpeach
 
 ## Usage
 
-After installing globally, start the TUI with:
+After installing globally, you have two entry points:
 
-```bash
-openpeach
-```
+- **TUI (full interface)** — start with `openpeach`:
+  ```bash
+  openpeach
+  ```
+
+- **CLI (hook management only)** — use `peach` for commands like `peach connect`:
+  ```bash
+  peach connect
+  ```
+
+The `peach` binary is a lightweight CLI for hook management (installs/updates `.claude/settings.json`), while `openpeach` launches the full TUI with live connection status, session stats, and token savings display.
 
 ### Connect Hooks to a Project
 

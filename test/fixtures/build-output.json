@@ -1,0 +1,11 @@
+{
+  "session_id": "test-session-006",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "npm run build"
+  },
+  "tool_response": {
+    "output": "> tsc\n\nCompiling TypeScript files...\n✓ src/cli.ts\n✓ src/commands/connect.ts\n✓ src/commands/hook-posttooluse.ts\n✓ src/hooks/useHookState.ts\n✓ src/components/Banner.tsx\n✓ src/components/StatusLines.tsx\n✓ src/components/WorkspaceContext.tsx\n✓ src/components/QuickCommands.tsx\n✓ src/components/PromptBox.tsx\n✓ src/components/ShortcutBar.tsx\n✓ src/components/ImportantChange.tsx\n✓ src/utils/format.ts\n✓ src/utils/validate.ts\n✓ src/index.tsx\n✓ src/App.tsx\n✓ src/global.d.ts\n\nType checking...\n✓ All types valid\n\nGenerating declarations...\n✓ dist/cli.d.ts\n✓ dist/commands/connect.d.ts\n✓ dist/commands/hook-posttooluse.d.ts\n✓ dist/hooks/useHookState.d.ts\n✓ dist/components/Banner.d.ts\n✓ dist/components/StatusLines.d.ts\n✓ dist/components/WorkspaceContext.d.ts\n✓ dist/components/QuickCommands.d.ts\n✓ dist/components/PromptBox.d.ts\n✓ dist/components/ShortcutBar.d.ts\n✓ dist/components/ImportantChange.d.ts\n✓ dist/utils/format.d.ts\n✓ dist/utils/validate.d.ts\n✓ dist/index.d.ts\n✓ dist/App.d.ts\n✓ dist/global.d.ts\n\nBuild completed successfully in 3.2s\n\nCompiling JSX...\n✓ src/components/Banner.tsx\n✓ src/components/StatusLines.tsx\n✓ src/components/WorkspaceContext.tsx\n✓ src/components/QuickCommands.tsx\n✓ src/components/PromptBox.tsx\n✓ src/components/ShortcutBar.tsx\n✓ src/components/ImportantChange.tsx\n✓ src/index.tsx\n✓ src/App.tsx\n\nBundling...\n✓ dist/cli.js (45.2 KB)\n✓ dist/index.js (128.7 KB)\n\nPost-build verification...\n✓ Shebang verified in dist/cli.js\n✓ All exports present\n\nBuild successful!"
+  },
+  "cwd": "/home/user/project"
+}

@@ -1,0 +1,11 @@
+{
+  "session_id": "test-session-005",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "ls -la"
+  },
+  "tool_response": {
+    "output": "total 64\ndrwxr-xr-x  8 user  staff   256 Jan 15 10:30 .\ndrwxr-xr-x  5 user  staff   160 Jan 15 10:25 ..\n-rw-r--r--  1 user  staff   512 Jan 15 10:30 package.json\n-rw-r--r--  1 user  staff   245 Jan 15 10:30 tsconfig.json\n-rw-r--r--  1 user  staff  1024 Jan 15 10:30 README.md\n-rw-r--r--  1 user  staff   128 Jan 15 10:30 .gitignore\ndrwxr-xr-x  4 user  staff   128 Jan 15 10:30 src\ndrwxr-xr-x  3 user  staff    96 Jan 15 10:30 test\n"
+  },
+  "cwd": "/home/user/project"
+}

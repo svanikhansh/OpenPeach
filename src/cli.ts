@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { program } from 'commander';
 import { connectCommand } from './commands/connect.js';
 import { hookPostToolUseCommand } from './commands/hook-posttooluse.js';

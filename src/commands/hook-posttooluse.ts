@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
+import { TRUNCATE_THRESHOLD, truncateOutput } from '../lib/truncate-output.js';
 
 interface PostToolUsePayload {
   session_id: string;
@@ -24,38 +25,21 @@ interface LogEntry {
   tokens_saved_estimate: number;
 }
 
-const TRUNCATE_THRESHOLD = 2000;
-const HEAD_LINES = 40;
-const TAIL_LINES = 20;
+const MAX_PAYLOAD_SIZE = 10 * 1024 * 1024; // 10MB max payload to prevent OOM
 
 function getSessionLogDir(): string {
   const home = os.homedir();
   return path.join(home, '.openpeach', 'sessions');
 }
 
-function getSessionLogPath(sessionId: string): string {
-  return path.join(getSessionLogDir(), `${sessionId}.jsonl`);
+function sanitizeSessionId(sessionId: string): string {
+  // Only allow alphanumeric, dash, underscore to prevent path traversal
+  return sessionId.replace(/[^a-zA-Z0-9_-]/g, '_');
 }
 
-function truncateOutput(output: string): { truncated: string; originalChars: number; truncatedChars: number } {
-  const lines = output.split('\n');
-  const originalChars = output.length;
-
-  if (originalChars <= TRUNCATE_THRESHOLD) {
-    return { truncated: output, originalChars, truncatedChars: originalChars };
-  }
-
-  if (lines.length <= HEAD_LINES + TAIL_LINES) {
-    return { truncated: output, originalChars, truncatedChars: originalChars };
-  }
-
-  const head = lines.slice(0, HEAD_LINES).join('\n');
-  const tail = lines.slice(-TAIL_LINES).join('\n');
-  const omittedCount = lines.length - HEAD_LINES - TAIL_LINES;
-  const truncated = `${head}\n[...${omittedCount} lines omitted...]\n${tail}`;
-  const truncatedChars = truncated.length;
-
-  return { truncated, originalChars, truncatedChars };
+function getSessionLogPath(sessionId: string): string {
+  const safeSessionId = sanitizeSessionId(sessionId);
+  return path.join(getSessionLogDir(), `${safeSessionId}.jsonl`);
 }
 
 function estimateTokensSaved(originalChars: number, truncatedChars: number): number {
@@ -76,16 +60,24 @@ export const hookPostToolUseCommand = new Command('hook')
     new Command('posttooluse')
       .description('PostToolUse hook handler - truncates long tool output')
       .action(async () => {
-        // Read JSON payload from stdin
+        // Read JSON payload from stdin with size limit to prevent OOM
         const stdin = process.stdin;
         let payload = '';
+        let payloadSize = 0;
         for await (const chunk of stdin) {
+          payloadSize += chunk.length;
+          if (payloadSize > MAX_PAYLOAD_SIZE) {
+            // Payload too large, exit silently to avoid breaking Claude Code
+            process.exit(0);
+            return;
+          }
           payload += chunk;
         }
 
         if (!payload.trim()) {
           // No input, exit silently
           process.exit(0);
+          return;
         }
 
         let data: PostToolUsePayload;

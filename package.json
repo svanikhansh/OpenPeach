@@ -1,6 +1,6 @@
 {
   "name": "openpeach",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A modern terminal UI CLI framework powered by Ink, React, and TypeScript.",
   "type": "module",
   "main": "dist/cli.js",
@@ -18,7 +18,9 @@
     "start": "tsx src/index.tsx",
     "dev:cli": "tsx src/cli.ts",
     "build": "tsc",
+    "postbuild": "node -e \"const fs=require('fs'); const content=fs.readFileSync('dist/cli.js','utf8'); if(!content.startsWith('#!/usr/bin/env node')){console.error('ERROR: dist/cli.js missing shebang'); process.exit(1);} console.log('✓ Shebang verified');\"",
     "typecheck": "tsc --noEmit",
+    "test": "tsx test/validate-truncation.ts",
     "prepare": "npm run build"
   },
   "repository": {

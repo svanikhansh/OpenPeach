@@ -108,12 +108,12 @@ if (-not $installed) {
   exit 1
 }
 
-if (Test-CommandExists "openpeach") {
+if (Test-CommandExists "peach") {
   Write-Host ""
   Write-Host "OpenPeach installed successfully."
-  Write-Host "Run it with: openpeach"
+  Write-Host "Run it with: peach"
 } else {
   Write-Host ""
-  Write-Host "Installation complete, but the 'openpeach' command is not in your PATH."
+  Write-Host "Installation complete, but the 'peach' command is not in your PATH."
   Write-Host "You may need to reload your PowerShell session or add your global npm bin to PATH."
 }

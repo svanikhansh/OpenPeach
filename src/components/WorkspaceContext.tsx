@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { Box, Text } from 'ink';
 import os from 'os';
 import { execFileSync } from 'child_process';
@@ -6,6 +6,7 @@ import { useHookState } from '../hooks/useHookState.js';
 
 interface WorkspaceContextValue {
   cwd: string;
+  refresh: () => void;
   branch: string;
   dirty: boolean;
   projectPath: string | null;
@@ -28,8 +29,9 @@ export function useWorkspaceContext() {
   return context;
 }
 
-function getWorkspaceContext() {
-  const cwd = process.cwd().replace(os.homedir(), '~');
+function getWorkspaceContext(): { cwd: string; branch: string; dirty: boolean } {
+  const home = os.homedir();
+  const cwd = process.cwd().startsWith(home) ? '~' + process.cwd().slice(home.length) : process.cwd();
   let branch = 'unknown';
   let dirty = false;
 
@@ -55,21 +57,34 @@ function getWorkspaceContext() {
 }
 
 export function WorkspaceContextProvider({ children }: { children: React.ReactNode }) {
-  const { cwd, branch, dirty } = getWorkspaceContext();
   const hookState = useHookState();
+  const [refreshToken, setRefreshToken] = useState(0);
+  const [gitInfo, setGitInfo] = useState<{ cwd: string; branch: string; dirty: boolean } | null>(null);
+
+  // Compute git info once on mount (async to avoid blocking render)
+  useEffect(() => {
+    setGitInfo(getWorkspaceContext());
+  }, [refreshToken]);
+
+  const contextValue = useMemo(
+    () => ({
+      cwd: gitInfo?.cwd ?? process.cwd(),
+      refresh: () => {
+        setRefreshToken((value) => value + 1);
+        hookState.refresh();
+      },
+      branch: gitInfo?.branch ?? 'unknown',
+      dirty: gitInfo?.dirty ?? false,
+      projectPath: hookState.projectPath,
+      isConnected: hookState.isConnected,
+      sessionStats: hookState.sessionStats,
+      currentSessionId: hookState.currentSessionId,
+    }),
+    [gitInfo, hookState]
+  );
 
   return (
-    <WorkspaceContext.Provider
-      value={{
-        cwd,
-        branch,
-        dirty,
-        projectPath: hookState.projectPath,
-        isConnected: hookState.isConnected,
-        sessionStats: hookState.sessionStats,
-        currentSessionId: hookState.currentSessionId,
-      }}
-    >
+    <WorkspaceContext.Provider value={contextValue}>
       {children}
     </WorkspaceContext.Provider>
   );
@@ -97,7 +112,7 @@ export function WorkspaceContextDisplay() {
       </Text>
       {currentSessionId && (
         <Text dimColor color="white">
-          Session: {currentSessionId.slice(0, 8)}... · Interventions: {sessionStats.interventions} · Tokens saved: ~{sessionStats.tokensSaved}
+          Session: {currentSessionId.length > 8 ? currentSessionId.slice(0, 8) + '...' : currentSessionId} · Interventions: {sessionStats.interventions} · Tokens saved: ~{sessionStats.tokensSaved}
         </Text>
       )}
     </Box>

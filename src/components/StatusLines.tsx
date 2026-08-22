@@ -1,12 +1,13 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import chalk from 'chalk';
 import { useWorkspaceContext } from './WorkspaceContext.js';
 
 const DOTS = ['#FFF4E6', '#FF9671', '#845EC2'];
 
 export function StatusLines() {
   const { isConnected, sessionStats, currentSessionId } = useWorkspaceContext();
+  const tokensSaved = sessionStats?.tokensSaved ?? 0;
+  const interventions = sessionStats?.interventions ?? 0;
 
   return (
     <Box flexDirection="column" paddingTop={1} paddingBottom={1}>
@@ -16,19 +17,19 @@ export function StatusLines() {
 
       <Box flexDirection="column" paddingTop={1}>
         <Text color="white">
-          {chalk.hex(DOTS[0])('●')} {isConnected ? 'Hook: Connected' : 'Hook: Not connected'}
+          <Text color={DOTS[0]}>●</Text> {isConnected ? 'Hook: Connected' : 'Hook: Not connected'}
         </Text>
         <Text color="white">
-          {chalk.hex(DOTS[1])('●')} Active Interceptors: PostToolUse (Bash, Read, Grep)
+          <Text color={DOTS[1]}>●</Text> Active Interceptors: PostToolUse (Bash, Read, Grep)
         </Text>
         <Text color="white">
-          {chalk.hex(DOTS[2])('●')} Session: {currentSessionId ? currentSessionId.slice(0, 8) + '...' : 'none'}
+          <Text color={DOTS[2]}>●</Text> Session: {currentSessionId ? (currentSessionId.length > 8 ? currentSessionId.slice(0, 8) + '...' : currentSessionId) : 'none'}
         </Text>
       </Box>
 
       <Box paddingTop={1}>
         <Text dimColor color="white">
-          Savings Engine: {isConnected ? 'Active' : 'Inactive'}  ·  Tokens Intercepted: {sessionStats.tokensSaved}  ·  Interventions: {sessionStats.interventions}
+          Savings Engine: {isConnected ? 'Active' : 'Inactive'}  ·  Tokens Intercepted: {tokensSaved}  ·  Interventions: {interventions}
         </Text>
       </Box>
     </Box>

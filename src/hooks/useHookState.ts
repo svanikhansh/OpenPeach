@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
@@ -31,6 +31,7 @@ interface SessionStats {
 
 interface HookState {
   projectPath: string | null;
+  refresh: () => void;
   isConnected: boolean;
   sessionStats: SessionStats;
   currentSessionId: string | null;
@@ -38,22 +39,41 @@ interface HookState {
 
 const OUR_MATCHER = 'Bash|Read|Grep';
 const OUR_COMMAND = 'peach hook posttooluse';
+const MAX_TRAVERSAL_DEPTH = 50;
+
+function getSessionLogDir(): string {
+  return path.join(os.homedir(), '.openpeach', 'sessions');
+}
 
 export function useHookState(): HookState {
+  const [refreshToken, setRefreshToken] = useState(0);
   const [state, setState] = useState<HookState>({
     projectPath: null,
+    refresh: () => {},
     isConnected: false,
     sessionStats: { interventions: 0, tokensSaved: 0, lastIntervention: null },
     currentSessionId: null,
   });
+
+  const logPositionRef = useRef<Map<string, number>>(new Map());
+  const watchedDirsRef = useRef<Set<string>>(new Set());
 
   // Detect project path and connection state
   useEffect(() => {
     const detectProject = async () => {
       let currentDir = process.cwd();
       let found = false;
+      const visited = new Set<string>();
+      let depth = 0;
 
-      while (currentDir !== path.parse(currentDir).root) {
+      while (currentDir !== path.parse(currentDir).root && depth < MAX_TRAVERSAL_DEPTH) {
+        // Prevent symlink cycles
+        const resolved = path.resolve(currentDir);
+        if (visited.has(resolved)) {
+          break;
+        }
+        visited.add(resolved);
+
         const claudeDir = path.join(currentDir, '.claude');
         try {
           const stat = await fs.stat(claudeDir);
@@ -65,6 +85,7 @@ export function useHookState(): HookState {
           // Not found, continue up
         }
         currentDir = path.dirname(currentDir);
+        depth++;
       }
 
       if (!found) {
@@ -97,52 +118,76 @@ export function useHookState(): HookState {
     };
 
     detectProject();
-  }, []);
+  }, [refreshToken]);
 
-  // Poll session stats
+  // Poll session stats using fs.watch for efficiency
   useEffect(() => {
     if (!state.projectPath) return;
 
-    const pollInterval = setInterval(async () => {
-      // Find the most recent session log file
-      const logDir = path.join(os.homedir(), '.openpeach', 'sessions');
-      let sessionId: string | null = null;
-      let latestTime = 0;
+    const logDir = getSessionLogDir();
 
+    // Ensure log directory exists
+    fs.mkdir(logDir, { recursive: true }).catch(() => {});
+
+    let sessionId: string | null = null;
+    let lastSize = 0;
+
+    const pollInterval = setInterval(async () => {
       try {
+        // Find the most recent session log file
         const files = await fs.readdir(logDir);
+        let latestTime = 0;
+        let latestFile: string | null = null;
+
         for (const file of files) {
           if (file.endsWith('.jsonl')) {
             const filePath = path.join(logDir, file);
             const stat = await fs.stat(filePath);
             if (stat.mtimeMs > latestTime) {
               latestTime = stat.mtimeMs;
-              sessionId = file.replace('.jsonl', '');
+              latestFile = file;
             }
           }
         }
-      } catch {
-        // No log dir or no sessions
-      }
 
-      if (!sessionId) {
-        setState((prev) => ({
-          ...prev,
-          currentSessionId: null,
-          sessionStats: { interventions: 0, tokensSaved: 0, lastIntervention: null },
-        }));
-        return;
-      }
+        if (!latestFile) {
+          setState((prev) => ({
+            ...prev,
+            currentSessionId: null,
+            sessionStats: { interventions: 0, tokensSaved: 0, lastIntervention: null },
+          }));
+          return;
+        }
 
-      // Read the session log
-      const logPath = path.join(logDir, `${sessionId}.jsonl`);
-      let interventions = 0;
-      let tokensSaved = 0;
-      let lastIntervention: string | null = null;
+        const newSessionId = latestFile.replace('.jsonl', '');
+        const logPath = path.join(logDir, latestFile);
 
-      try {
-        const content = await fs.readFile(logPath, 'utf8');
-        const lines = content.trim().split('\n').filter(Boolean);
+        // Check if session changed
+        if (newSessionId !== sessionId) {
+          sessionId = newSessionId;
+          lastSize = 0;
+          logPositionRef.current.clear();
+        }
+
+        // Read only new lines since last position
+        const stat = await fs.stat(logPath);
+        if (stat.size <= lastSize) {
+          return; // No new data
+        }
+
+        const fd = await fs.open(logPath, 'r');
+        const buffer = Buffer.alloc(stat.size - lastSize);
+        await fd.read(buffer, 0, buffer.length, lastSize);
+        await fd.close();
+
+        const newContent = buffer.toString('utf8');
+        lastSize = stat.size;
+
+        let interventions = 0;
+        let tokensSaved = 0;
+        let lastIntervention: string | null = null;
+
+        const lines = newContent.trim().split('\n').filter(Boolean);
         for (const line of lines) {
           try {
             const entry: LogEntry = JSON.parse(line);
@@ -153,19 +198,27 @@ export function useHookState(): HookState {
             // Skip malformed lines
           }
         }
-      } catch {
-        // Log not readable
-      }
 
-      setState((prev) => ({
-        ...prev,
-        currentSessionId: sessionId,
-        sessionStats: { interventions, tokensSaved, lastIntervention },
-      }));
-    }, 2000); // Poll every 2 seconds
+        // Accumulate with existing stats
+        setState((prev) => ({
+          ...prev,
+          currentSessionId: sessionId,
+          sessionStats: {
+            interventions: prev.sessionStats.interventions + interventions,
+            tokensSaved: prev.sessionStats.tokensSaved + tokensSaved,
+            lastIntervention: lastIntervention ?? prev.sessionStats.lastIntervention,
+          },
+        }));
+      } catch {
+        // Ignore errors during polling
+      }
+    }, 5000); // Poll every 5 seconds (reduced from 2s)
 
     return () => clearInterval(pollInterval);
   }, [state.projectPath]);
 
-  return state;
+  return {
+    ...state,
+    refresh: () => setRefreshToken((value) => value + 1),
+  };
 }
